@@ -29,6 +29,10 @@
 #include <core/optimization/MinimizerOptions.hh>
 #include <core/optimization/AtomTreeMinimizer.hh>
 #include <core/pack/pack_rotamers.hh>
+#include <protocols/bootcamp/fold_tree_from_ss.hh>
+#include <core/kinematics/FoldTree.hh>
+#include <core/pose/util.hh>
+
 
 
 
@@ -63,6 +67,13 @@ main(int argc, char ** argv) {
             
             //declare copy_pose
             core::pose::Pose copy_pose;
+            
+            //add cutpoint for the pose and change the score function
+            core::kinematics::FoldTree set_fold_tree = protocols::bootcamp::fold_tree_from_ss( *mypose );
+            (*mypose).fold_tree(set_fold_tree);
+            (*sfxn).set_weight(core::scoring::linear_chainbreak, 1);
+            core::pose::correctly_add_cutpoint_variants(*mypose);
+            
 
             for (core::Size iter = 1; iter<=1000; iter++) {
                 std::cout<<"The score of last accepted pose :"<<mc.total_score_of_last_considered_pose()<<std::endl;
